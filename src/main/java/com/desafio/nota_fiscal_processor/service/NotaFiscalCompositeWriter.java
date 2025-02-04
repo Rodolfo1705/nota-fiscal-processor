@@ -69,7 +69,8 @@ public class NotaFiscalCompositeWriter implements ItemStreamWriter<NotaFiscalRes
                 );
 
                 validLines.add(line);
-            } else {
+            }
+            else {
                 String line = result.getNotaFiscal().getExtraFields();
 
                 if (line == null || line.trim().isEmpty()) {
