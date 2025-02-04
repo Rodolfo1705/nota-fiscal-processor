@@ -13,7 +13,7 @@ public class NotaFiscalProcessor implements ItemProcessor<String, NotaFiscalResu
         List<String> data = List.of(item.split(","));
 
         if (data.size() != 3) {
-            return returnInvalidNotaFiscalResult(item, "Número de campos inválido.");
+            return returnInvalidNotaFiscalResult(item, "Quantidade de campos inválida.");
         }
 
         data = data.stream().map(String::trim).toList();

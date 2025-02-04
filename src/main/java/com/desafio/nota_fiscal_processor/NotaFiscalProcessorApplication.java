@@ -27,10 +27,6 @@ public class NotaFiscalProcessorApplication implements CommandLineRunner {
 	public void run(String... args) throws Exception {
 		Job job = (Job) applicationContext.getBean("notaFiscalJob");
 
-		JobParameters jobParameters = new JobParametersBuilder()
-				.addString("jobId", String.valueOf(System.currentTimeMillis()))
-				.toJobParameters();
-
-		jobLauncher.run(job, jobParameters);
+		jobLauncher.run(job, new JobParameters());
 	}
 }

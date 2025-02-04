@@ -27,6 +27,7 @@ public class NotaFiscalCompositeWriter implements ItemStreamWriter<NotaFiscalRes
         if (validWriter != null) {
             ((ItemStream) validWriter).open(executionContext);
         }
+
         if (invalidWriter != null) {
             ((ItemStream) invalidWriter).open(executionContext);
         }
@@ -37,6 +38,7 @@ public class NotaFiscalCompositeWriter implements ItemStreamWriter<NotaFiscalRes
         if (validWriter != null) {
             ((ItemStream) validWriter).update(executionContext);
         }
+
         if (invalidWriter != null) {
             ((ItemStream) invalidWriter).update(executionContext);
         }
@@ -47,15 +49,12 @@ public class NotaFiscalCompositeWriter implements ItemStreamWriter<NotaFiscalRes
         if (validWriter != null) {
             ((ItemStream) validWriter).close();
         }
+
         if (invalidWriter != null) {
             ((ItemStream) invalidWriter).close();
         }
     }
-    /**
-     * Para cada chunk, se o registro for válido, monta a linha com os 3 campos;
-     * se for inválido, verifica se o campo extraFields está preenchido (com a linha original)
-     * e o imprime como uma única coluna.
-     */
+
     @Override
     public void write(Chunk<? extends NotaFiscalResult> chunk) throws Exception {
         List<String> validLines = new ArrayList<>();
@@ -66,20 +65,20 @@ public class NotaFiscalCompositeWriter implements ItemStreamWriter<NotaFiscalRes
                 String line = String.format("%s,%s,%s",
                         result.getNotaFiscal().getId(),
                         result.getNotaFiscal().getCnpj(),
-                        result.getNotaFiscal().getValor());
+                        result.getNotaFiscal().getValor()
+                );
 
                 validLines.add(line);
             } else {
-                // Se extraFields estiver preenchido, usa-o (contendo a linha original)
                 String line = result.getNotaFiscal().getExtraFields();
 
                 if (line == null || line.trim().isEmpty()) {
-                    // Caso contrário, formata com os 3 campos e a mensagem de erro (menos desejável)
                     line = String.format("%s,%s,%s,%s",
                             result.getNotaFiscal().getId(),
                             result.getNotaFiscal().getCnpj(),
                             result.getNotaFiscal().getValor(),
-                            result.getErrorMessage());
+                            result.getErrorMessage()
+                    );
                 }
 
                 invalidLines.add(line);

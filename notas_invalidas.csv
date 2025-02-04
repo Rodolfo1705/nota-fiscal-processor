@@ -1,2 +1,2 @@
-3,12345678000195,-500
-4,invalidCNPJ,3000 5, 12345678000195,0
+3,12345678000195,-500, O valor deve ser igual ou maior que zero.
+4,invalidCNPJ,3000 5, 12345678000195,0, Quantidade de campos inválida.
