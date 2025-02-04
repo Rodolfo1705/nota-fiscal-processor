@@ -44,7 +44,7 @@ public class NotaFiscal {
         return extraFields;
     }
 
-    public void setCamposExtras(String extraFields) {
+    public void setExtraFields(String extraFields) {
         this.extraFields = extraFields;
     }
 }
