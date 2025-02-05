@@ -1,6 +1,5 @@
 package com.desafio.nota_fiscal_processor.model;
 
-import java.math.BigDecimal;
 
 public class NotaFiscalResult {
     private NotaFiscal notaFiscal;
@@ -13,16 +12,8 @@ public class NotaFiscalResult {
         this.errorMessage = errorMessage;
     }
 
-    public Long getId(){
-        return notaFiscal.getId();
-    }
-
-    public String getCnpj(){
-        return notaFiscal.getCnpj();
-    }
-
-    public BigDecimal getValor(){
-        return notaFiscal.getValor();
+    public NotaFiscal getNotaFiscal() {
+        return notaFiscal;
     }
 
     public boolean isValid(){

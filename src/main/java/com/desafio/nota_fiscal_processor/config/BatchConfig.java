@@ -1,9 +1,6 @@
 package com.desafio.nota_fiscal_processor.config;
 
-import com.desafio.nota_fiscal_processor.mapper.NotaFiscalMapper;
-import com.desafio.nota_fiscal_processor.model.NotaFiscal;
 import com.desafio.nota_fiscal_processor.model.NotaFiscalResult;
-import com.desafio.nota_fiscal_processor.service.NotaFiscalClassifier;
 import com.desafio.nota_fiscal_processor.service.NotaFiscalCompositeWriter;
 import com.desafio.nota_fiscal_processor.service.NotaFiscalProcessor;
 import org.springframework.batch.core.Job;
@@ -20,7 +17,7 @@ import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.batch.item.file.builder.FlatFileItemWriterBuilder;
-import org.springframework.batch.item.support.ClassifierCompositeItemWriter;
+import org.springframework.batch.item.file.mapping.PassThroughLineMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,96 +36,68 @@ public class BatchConfig {
     private PlatformTransactionManager platformTransactionManager;
 
     @Bean
-    public FlatFileItemReader<NotaFiscal> reader(){
-        System.out.println("1");
-       return new FlatFileItemReaderBuilder<NotaFiscal>()
+    public FlatFileItemReader<String> reader(){
+       return new FlatFileItemReaderBuilder<String>()
                 .name("notaFiscalReader")
-                .delimited()
-                .names("id", "cnpj", "valor")
-                .targetType(NotaFiscal.class)
                 .resource(new ClassPathResource("notas_fiscais.csv"))
-                .fieldSetMapper(new NotaFiscalMapper())
-                .strict(false)
+                .lineMapper(new PassThroughLineMapper())
                 .build();
     }
 
     @Bean
-    public ItemProcessor<NotaFiscal, NotaFiscalResult> processor(){
-        System.out.println("2");
+    public ItemProcessor<String, NotaFiscalResult> processor(){
         return new NotaFiscalProcessor();
     }
 
     @Bean
-    public FlatFileItemWriter<NotaFiscalResult> validWriter(){
-        System.out.println("3");
-        return new FlatFileItemWriterBuilder<NotaFiscalResult>()
+    public FlatFileItemWriter<String> validWriter(){
+        return new FlatFileItemWriterBuilder<String>()
                 .name("validWriter")
                 .resource(new FileSystemResource("notas_validas.csv"))
-                .delimited().delimiter(", ")
-                .names("id", "cnpj", "valor")
+                .lineAggregator(item -> item)
                 .build();
     }
 
     @Bean
-    public FlatFileItemWriter<NotaFiscalResult> invalidWriter(){
-        System.out.println("4");
-        return new FlatFileItemWriterBuilder<NotaFiscalResult>()
+    public FlatFileItemWriter<String> invalidWriter(){
+        return new FlatFileItemWriterBuilder<String>()
                 .name("invalidWriter")
                 .resource(new FileSystemResource("notas_invalidas.csv"))
-                .delimited().delimiter(", ")
-                .names("id", "cnpj", "valor")
+                .lineAggregator(item -> item)
                 .build();
     }
 
     @Bean
-    public ClassifierCompositeItemWriter<NotaFiscalResult> classifierWriter(NotaFiscalClassifier classifier){
-        System.out.println("5");
-        ClassifierCompositeItemWriter<NotaFiscalResult> writer = new ClassifierCompositeItemWriter<>();
-
-        writer.setClassifier(classifier);
-        return writer;
+    public ItemStreamWriter<NotaFiscalResult> compositeWriter(
+            FlatFileItemWriter<String> validWriter,
+            FlatFileItemWriter<String> invalidWriter){
+        return new NotaFiscalCompositeWriter(
+                validWriter,
+                invalidWriter
+        );
     }
 
     @Bean
-    public Step processStep(ItemReader<NotaFiscal> reader,
-                            ItemProcessor<NotaFiscal, NotaFiscalResult> processor,
-                            ClassifierCompositeItemWriter<NotaFiscalResult> writer){
+    public Step processStep(ItemReader<String> reader,
+                            ItemProcessor<String, NotaFiscalResult> processor,
+                            ItemStreamWriter<NotaFiscalResult> writer){
         System.out.println("6");
         return new StepBuilder("processStep", jobRepository)
-                .<NotaFiscal, NotaFiscalResult>chunk(5, platformTransactionManager)
+                .<String, NotaFiscalResult>chunk(5, platformTransactionManager)
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)
                 .stream(validWriter())
                 .stream(invalidWriter())
+                .transactionManager(platformTransactionManager)
                 .build();
     }
 
     @Bean
     public Job notaFiscalJob(Step processStep){
-        System.out.println("7");
-        return new JobBuilder("invoiceJob", jobRepository)
+        return new JobBuilder("notaFiscalJob", jobRepository)
                 .incrementer(new RunIdIncrementer())
                 .start(processStep)
                 .build();
-    }
-
-    @Bean
-    public NotaFiscalClassifier classifier(FlatFileItemWriter<NotaFiscalResult> validWriter,
-                                           FlatFileItemWriter<NotaFiscalResult> invalidWriter){
-        System.out.println("8");
-        return new NotaFiscalClassifier(validWriter, invalidWriter);
-    }
-
-    @Bean
-    public ItemStreamWriter<NotaFiscalResult> compositeWriter(NotaFiscalClassifier classifier,
-                                                              FlatFileItemWriter<NotaFiscalResult> validWriter,
-                                                              FlatFileItemWriter<NotaFiscalResult> invalidWriter){
-        System.out.println("9");
-        return new NotaFiscalCompositeWriter(
-                validWriter,
-                invalidWriter,
-                classifier
-        );
     }
 }
