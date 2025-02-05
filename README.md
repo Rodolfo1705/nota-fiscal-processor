@@ -4,7 +4,6 @@
 
 
 
-<h4> Rode o seguinte comando no diretorio que você deseja clonar o projeto: </h4>
 <p> Rode o seguinte comando no diretorio que você deseja clonar o projeto: </p>
 
     git clone https://github.com/Rodolfo1705/nota-fiscal-processor.git
@@ -13,7 +12,7 @@
 
 <h2>2. Execute o projeto.</h2>
 
-<p> Utilize uma IDE de sua preferência para rodar a API.
+<p> Utilize uma IDE de sua preferência para rodar o Job.
 
 Recomendação: IntelliJ IDEA.
 
