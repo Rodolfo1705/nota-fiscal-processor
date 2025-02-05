@@ -12,7 +12,9 @@ public class NotaFiscalResult {
         this.errorMessage = errorMessage;
     }
 
-    public NotaFiscal getNotaFiscal() {return notaFiscal;}
+    public NotaFiscal getNotaFiscal() {
+        return notaFiscal;
+    }
 
     public boolean isValid(){
         return valid;
